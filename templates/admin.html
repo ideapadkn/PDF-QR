@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PDF Админ-Панель</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="block1">
+          <h2 class="block1-title">Добро пожаловать, {{ username }}</h2>
+          <a class="exit-btn" href="/logout">Выйти</a>
+        </div>
+
+        <div class="block2">
+          <h3 class="block2-title">Загрузка PDF-файла</h3>
+          <form
+            class="block2-form"
+            action="/upload"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <input
+              class="block2-input"
+              type="file"
+              name="pdf_file"
+              accept="application/pdf"
+              required
+            />
+            <button class="download-btn" type="submit">Загрузить</button>
+          </form>
+        </div>
+
+        <div class="block3">
+          <h3 class="block3-title">Список загруженных PDF:</h3>
+          <ul class="block3-list">
+            {% for file in files %}
+            <li class="block3-item">
+              <a href="/pdfs/{{ file }}" target="_blank">{{ file }}</a>
+              <form
+                action="/delete/{{ file }}"
+                method="post"
+                style="display: inline"
+              >
+                <button
+                  class="delete-btn"
+                  type="submit"
+                  onclick="return confirm('Удалить {{ file }}?')"
+                >
+                  Удалить
+                </button>
+              </form>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </header>
+  </body>
+</html>
