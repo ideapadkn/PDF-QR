@@ -1,63 +1,272 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
   <head>
-    <title>PDF Админ-Панель</title>
+    <meta charset="UTF-8" />
+    <title>Админ-панель PDF</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
+    <style>
+      body {
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+        padding: 40px;
+        color: #333;
+      }
+
+      .welcome-block {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .logout {
+        background-color: #d9534f;
+        color: white;
+        padding: 5px 13px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+      }
+
+      .logout:hover {
+        background-color: #c9302c;
+      }
+
+      h2 {
+        margin-top: 0;
+      }
+
+      .upload-block {
+        margin: 50px 0 0 0;
+      }
+
+      .upload-block h3 {
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .upload-box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .upload-box form {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      input[type="file"] {
+        margin-bottom: 10px;
+      }
+
+      button[type="submit"] {
+        padding: 8px 16px;
+        border: none;
+        background-color: rgb(4, 181, 7);
+        color: white;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button[type="submit"]:hover {
+        background-color: rgb(3, 150, 6);
+      }
+
+      .pdf-list h3 {
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      li {
+        margin-bottom: 10px;
+      }
+
+      .pdf-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .pdf-item button {
+        background-color: #d9534f;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .pdf-item button:hover {
+        background-color: #c9302c;
+      }
+
+      a.pdf-link {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+      }
+
+      form.inline {
+        display: inline;
+      }
+
+      .container {
+        max-width: 700px;
+        margin: auto;
+      }
+
+      .link-generator {
+        margin-top: 50px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .link-generator h3 {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .link-generator input[type="text"] {
+        width: calc(100% - 20px);
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .link-generator button {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .link-generator button:hover {
+        background-color: #0056b3;
+      }
+
+      #link-generator {
+        display: flex;
+        flex-direction: column;
+      }
+
+    </style>
   </head>
   <body>
-    <header class="header">
-      <div class="container">
-        <div class="block1">
-          <h2 class="block1-title">Добро пожаловать, {{ username }}</h2>
-          <a class="exit-btn" href="/logout">Выйти</a>
-        </div>
+    <div class="container">
+      <div class="welcome-block">
+        <h2>Добро пожаловать, {{ username }}</h2>
+        <a href="/logout" class="logout">Выйти</a>
+      </div>
 
-        <div class="block2">
-          <h3 class="block2-title">Загрузка PDF-файла</h3>
-          <form
-            class="block2-form"
-            action="/upload"
-            method="POST"
-            enctype="multipart/form-data"
-          >
+      <div class="upload-block">
+        <h3 class="title">Загрузка PDF-файла</h3>
+        <div class="upload-box">
+          <form action="/upload" method="POST" enctype="multipart/form-data">
             <input
-              class="block2-input"
               type="file"
               name="pdf_file"
               accept="application/pdf"
               required
             />
-            <button class="download-btn" type="submit">Загрузить</button>
+            <button type="submit">Загрузить</button>
           </form>
         </div>
+      </div>
 
-        <div class="block3">
-          <h3 class="block3-title">Список загруженных PDF:</h3>
-          <ul class="block3-list">
-            {% for file in files %}
-            <li class="block3-item">
-              <a href="/pdfs/{{ file }}" target="_blank">{{ file }}</a>
-              <form
-                action="/delete/{{ file }}"
-                method="post"
-                style="display: inline"
+      <div class="pdf-list">
+        <h3 class="title">Список загруженных PDF:</h3>
+        <ul class="pdf-links">
+          {% for file, enc in links.items() %}
+          <li class="pdf-item">
+            <a href="/view/{{ enc }}" class="pdf-link" target="_blank"
+              >{{ file }}</a
+            >
+            <form action="/delete/{{ file }}" method="post" class="inline">
+              <button
+                type="submit"
+                onclick="return confirm('Удалить {{ file }}?')"
               >
-                <button
-                  class="delete-btn"
-                  type="submit"
-                  onclick="return confirm('Удалить {{ file }}?')"
-                >
-                  Удалить
-                </button>
-              </form>
-            </li>
-            {% endfor %}
-          </ul>
+                Удалить
+              </button>
+            </form>
+          </li>
+          {% else %}
+          <li style="margin-top: 10px">Нет загруженных PDF-файлов.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="link-generator">
+        <h3>Генератор ссылки и QR по имени PDF:</h3>
+        <div class="upload-box">
+          <form id="link-generator" onsubmit="return false;">
+            <input
+              type="text"
+              id="filename"
+              placeholder="Введите имя файла, например: file.pdf"
+              required
+              style="width: 100%; padding: 8px"
+            />
+            <br /><br />
+            <button onclick="generateLink()">Сгенерировать ссылку и QR</button>
+          </form>
+          <br />
+          <div id="link-output" style="display: none">
+            <p>
+              <strong>Ссылка:</strong>
+              <a id="generated-link" href="" target="_blank"></a>
+            </p>
+            <p><strong>QR-код:</strong></p>
+            <img id="qr-image" src="" alt="QR Code" style="max-width: 200px" />
+          </div>
         </div>
       </div>
-    </header>
+    </div>
+
+    <script>
+      function generateLink() {
+        const filename = document.getElementById("filename").value.trim();
+        if (!filename.endsWith(".pdf")) {
+          alert("Имя файла должно заканчиваться на .pdf");
+          return;
+        }
+
+        const encoded = btoa(filename); // не обрезаем padding!
+        const fullLink = `/view/${encoded}`;
+
+        document.getElementById("generated-link").href = fullLink;
+        document.getElementById("generated-link").textContent =
+          window.location.origin + fullLink;
+        document.getElementById(
+          "qr-image"
+        ).src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+          window.location.origin + fullLink
+        )}&size=200x200`;
+        document.getElementById("link-output").style.display = "block";
+      }
+    </script>
   </body>
 </html>
